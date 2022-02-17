@@ -1,96 +1,68 @@
-// import { login, logout, getInfo } from '@/api/user'
-// import { getToken, setToken, removeToken } from '@/utils/auth'
-// import { resetRouter } from '@/router'
 
-// const getDefaultState = () => {
-//   return {
-//     token: getToken(),
-//     name: '',
-//     avatar: ''
-//   }
-// }
+import { getToken, setToken, removeToken, setTimeStamp } from '@/utils/auth'
+import { login, getUserInfo, getUserDetailById } from '@/api/user'
 
-// const state = getDefaultState()
+// 状态
+const state = {
+  token: getToken(),
+  userInfo: {}// 定义一个空对象
+}
+// 修改状态
+const mutations = {
+// 获取token
+  setToken(state, token) {
+    state.token = token
+    // 同步到本地缓存
+    setToken(token)
+  },
 
-// const mutations = {
-//   RESET_STATE: (state) => {
-//     Object.assign(state, getDefaultState())
-//   },
-//   SET_TOKEN: (state, token) => {
-//     state.token = token
-//   },
-//   SET_NAME: (state, name) => {
-//     state.name = name
-//   },
-//   SET_AVATAR: (state, avatar) => {
-//     state.avatar = avatar
-//   }
-// }
+  // 删除token
+  removeToken(state) {
+    state.token = null
+    removeToken()
+  },
+  // 获取用户信息
+  setUserInfo(state, payload) {
+    state.userInfo = payload // 响应式
+  },
+  // 删除用户信息
+  removeUserInfo(state) {
+    state.userInfo = {}
+  }
+}
+// 执行异步
+const actions = {
 
-// const actions = {
-//   // user login
-//   login({ commit }, userInfo) {
-//     const { username, password } = userInfo
-//     return new Promise((resolve, reject) => {
-//       login({ username: username.trim(), password: password }).then(response => {
-//         const { data } = response
-//         commit('SET_TOKEN', data.token)
-//         setToken(data.token)
-//         resolve()
-//       }).catch(error => {
-//         reject(error)
-//       })
-//     })
-//   },
+  async  login(context, data) {
+    // 接口API
+    const result = await login(data)
+    // 这边不需要判断状态是否成功，判断条件前置在axios响应拦截器中已经设置好了
+    context.commit('setToken', result)
+    // 写入时间戳
+    setTimeStamp() // 将当前的最新时间写入缓存
+  },
 
-//   // get user info
-//   getInfo({ commit, state }) {
-//     return new Promise((resolve, reject) => {
-//       getInfo(state.token).then(response => {
-//         const { data } = response
+  // 获取用户资料action
+  async getUserInfo(context) {
+    const result = await getUserInfo() // result就是用户的基本资料
+    const baseInfo = await getUserDetailById(result.userId) // 为了获取头像
+    const baseResult = { ...result, ...baseInfo } // 将两个接口结果合并
+    // 获取用户的基本资料
+    context.commit('setUserInfo', baseResult) // 将整个的个人信息设置到用户的vuex数据中
+    return baseResult
+  },
+  // 退出用户
 
-//         if (!data) {
-//           return reject('Verification failed, please Login again.')
-//         }
-
-//         const { name, avatar } = data
-
-//         commit('SET_NAME', name)
-//         commit('SET_AVATAR', avatar)
-//         resolve(data)
-//       }).catch(error => {
-//         reject(error)
-//       })
-//     })
-//   },
-
-//   // user logout
-//   logout({ commit, state }) {
-//     return new Promise((resolve, reject) => {
-//       logout(state.token).then(() => {
-//         removeToken() // must remove  token  first
-//         resetRouter()
-//         commit('RESET_STATE')
-//         resolve()
-//       }).catch(error => {
-//         reject(error)
-//       })
-//     })
-//   },
-
-//   // remove token
-//   resetToken({ commit }) {
-//     return new Promise(resolve => {
-//       removeToken() // must remove  token  first
-//       commit('RESET_STATE')
-//       resolve()
-//     })
-//   }
-// }
-
+  logout(context) {
+    // 删除token
+    context.commit('removeToken') // 删除了缓存中的信息
+    // 删除用户资料
+    context.commit('removeUserInfo') // 删除用户信息
+  }
+}
 export default {
   namespaced: true,
-  state: {},
-  mutations: {},
-  actions: {}
+  state,
+  mutations,
+  actions
 }
