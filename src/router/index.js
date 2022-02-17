@@ -51,14 +51,14 @@ export const constantRoutes = [
 ]
 
 export const asyncRoutes = [
-  approvalsRouter,
   departmentsRouter,
   employeesRouter,
+  settingRouter,
+  socialRouter,
   permissionRouter,
   attendancesRouter,
   salarysRouter,
-  settingRouter,
-  socialRouter
+  approvalsRouter
 ]
 
 const createRouter = () => new Router({
