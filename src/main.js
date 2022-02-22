@@ -12,9 +12,12 @@ import App from './App'
 import store from './store'
 import router from './router'
 
+import Component from '@/components'// 全局定义的组件
 import '@/icons' // icon
 import '@/permission' // permission control
-import * as directives from '@/directives'
+
+import * as directives from '@/directives'// 引入指令
+import * as filters from '@/filters'// 引入过滤器
 
 /**
  * If you don't want to use mock-server
@@ -42,6 +45,12 @@ Object.keys(directives).forEach(key => {
   // 注册自定义指令
   Vue.directive(key, directives[key])
 })
+// 注册自定义过滤器
+Object.keys(filters).forEach(key => {
+  Vue.filter(key, filters[key])
+})
+
+Vue.use(Component) // 注册自己的插件
 
 new Vue({
   el: '#app',

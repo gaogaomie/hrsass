@@ -1,6 +1,11 @@
 <template>
   <div class="dashboard-container">
     <div class="dashboard-text">name: {{ name }}</div>
+    <PageTools :show-before="true">
+      <span slot="before">少年歌行</span>
+      <el-button slot="after" type="info">导出excel</el-button>
+    </PageTools>
+    <ImageUpload />
   </div>
 </template>
 
@@ -9,6 +14,7 @@ import { mapGetters } from 'vuex'
 
 export default {
   name: 'Dashboard',
+
   computed: {
     ...mapGetters([
       'name'
